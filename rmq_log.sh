@@ -33,11 +33,22 @@ for vhost in "${vhosts[@]}"; do
   total_consumers=0
 
   for q in "${queues[@]}"; do
-    set -- $q
-    total_msgs=$((total_msgs + ${2:-0}))
-    total_ready=$((total_ready + ${3:-0}))
-    total_unacked=$((total_unacked + ${4:-0}))
-    total_consumers=$((total_consumers + ${5:-0}))
+    # cada linha é: name msgs ready unacked consumers
+    name=$(awk '{print $1}' <<<"$q")
+    msgs=$(awk '{print $2}' <<<"$q")
+    ready=$(awk '{print $3}' <<<"$q")
+    unacked=$(awk '{print $4}' <<<"$q")
+    consumers=$(awk '{print $5}' <<<"$q")
+
+    msgs=${msgs:-0}
+    ready=${ready:-0}
+    unacked=${unacked:-0}
+    consumers=${consumers:-0}
+
+    total_msgs=$((total_msgs + msgs))
+    total_ready=$((total_ready + ready))
+    total_unacked=$((total_unacked + unacked))
+    total_consumers=$((total_consumers + consumers))
   done
 
   echo "$timestamp,$node,\"$vhost\",\"$alarms\",$total_queues,$total_msgs,$total_ready,$total_unacked,$total_consumers,$load1,$load5,$load15" >> "$outfile"
